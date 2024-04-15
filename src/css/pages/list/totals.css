@@ -1,0 +1,17 @@
+.total-currency,
+.q-field__native.row.items-center span {
+  font-weight: bold;
+}
+
+.select-tooltip {
+  font-size: 14px;
+  font-weight: bold;
+  background: black;
+}
+
+tr:has(.q-tr--totals) {
+  position: sticky;
+  bottom: 0;
+  background: beige !important;
+  z-index: 1;
+}

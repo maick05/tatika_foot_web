@@ -1,0 +1,76 @@
+.filters-container {
+  /* background-color: #1976d2d9; */
+  /* background-color: #ffffff1f; */
+  background-color: #1976d2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  max-width: 300px; /* Define a largura máxima da sidebar */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-right: 10px;
+  /* max-height: 90vh;  */
+  /* overflow-y: auto;
+  overflow-x: hidden; */
+}
+
+.filter-field {
+  width: 100%; /* Ou qualquer outra largura que se ajuste ao seu design */
+}
+
+.btn-side-filter {
+  width: 100%;
+  margin-right: auto;
+}
+
+.input-filter-container {
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 60%;
+  padding-right: 10px;
+}
+
+.filter-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  padding-bottom: 7px; /* Espaço extra para a sombra */
+  position: relative; /* Necessário para a sombra */
+  width: 100%;
+  text-align: left;
+}
+
+.filter-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px; /* Altura da "borda" */
+  background: rgb(155, 148, 148); /* Efeito suave */
+  /* Ajuste as cores e a opacidade conforme necessário */
+}
+
+.q-field__label {
+  font-weight: bold;
+}
+
+.q-toggle__label,
+.filter-title {
+  font-weight: bold;
+  color: white;
+}
+
+.q-field--labeled {
+  background-color: white;
+}
+
+.close-btn {
+  position: absolute;
+  color: white;
+  right: 10px;
+  top: 10px;
+  z-index: 10;
+}
