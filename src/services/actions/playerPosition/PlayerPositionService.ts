@@ -1,36 +1,39 @@
 import { MatchFieldService } from 'src/services/field/MatchFieldService';
 import { AbstractActionService } from '../AbstractActionService';
 import { MatchPlayer } from 'src/interface/MatchField';
-import { PassRange } from 'src/constants/PassConstants';
+import { Position } from 'src/interface/Position';
+import { CLOSE_OPPONENT_AREA } from 'src/constants/InterceptationConstants';
 
 export class PlayerPositionService extends AbstractActionService {
   constructor(protected readonly matchFieldService: MatchFieldService) {
     super(matchFieldService);
   }
 
-  hasPlayerOnLine(posicaoInicial, posicaoFinal, adversarios: MatchPlayer[]) {
-    // Calcula os deltas e os passos necessários para percorrer a linha
-    const deltaX = posicaoFinal[0] - posicaoInicial[0];
-    const deltaY = posicaoFinal[1] - posicaoInicial[1];
-    const passos = Math.max(Math.abs(deltaX), Math.abs(deltaY));
-    const incrementoX = deltaX / passos;
-    const incrementoY = deltaY / passos;
+  hasPlayerOnLine(
+    initPosition: Position,
+    finalPosition: Position,
+    opponents: MatchPlayer[]
+  ) {
+    const deltaX = finalPosition[0] - initPosition[0];
+    const deltaY = finalPosition[1] - initPosition[1];
+    const cells = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+    const incrementX = deltaX / cells;
+    const incrementY = deltaY / cells;
 
-    let xAtual = posicaoInicial[0];
-    let yAtual = posicaoInicial[1];
+    let actualX = initPosition[0];
+    let actualY = initPosition[1];
 
-    // Verifica cada ponto ao longo da linha de passe
-    for (let i = 0; i <= passos; i++) {
-      xAtual += incrementoX;
-      yAtual += incrementoY;
+    for (let i = 0; i <= cells; i++) {
+      actualX += incrementX;
+      actualY += incrementY;
 
-      const xArredondado = Math.round(xAtual);
-      const yArredondado = Math.round(yAtual);
+      const roundX = Math.round(actualX);
+      const roundY = Math.round(actualY);
 
-      for (const adversario of adversarios) {
+      for (const opponent of opponents) {
         if (
-          adversario.position[0] === xArredondado &&
-          adversario.position[1] === yArredondado
+          opponent.position[0] === roundX &&
+          opponent.position[1] === roundY
         ) {
           return true;
         }
@@ -40,13 +43,16 @@ export class PlayerPositionService extends AbstractActionService {
     return false;
   }
 
-  closeOpponentPlayer(opponentDestination, opponentPosition) {
-    const distancia = this.calculateDistance(
+  closeOpponentPlayer(
+    opponentDestination: Position,
+    opponentPosition: Position
+  ) {
+    const distance = this.calculateDistance(
       opponentDestination,
       opponentPosition
     );
-    const proximo = distancia <= Math.sqrt(PassRange.SHORT_PASS);
-    if (proximo) console.log('Adversário Próximo');
-    return proximo;
+    const isClose = distance <= Math.sqrt(CLOSE_OPPONENT_AREA);
+    if (isClose) console.log('Adversário Próximo');
+    return isClose;
   }
 }
