@@ -50,7 +50,10 @@ export class CrossingService extends AbstractActionService {
       )
         this.matchFieldService.logStep('Bola para escanteio.');
 
-      return interception;
+      return {
+        ...interception,
+        success: false,
+      };
     }
 
     return this.endCrossing(crossPlayer, crossingValue, destination);
