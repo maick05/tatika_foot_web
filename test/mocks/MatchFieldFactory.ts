@@ -64,22 +64,46 @@ const physical: Partial<Physical> = {
   height: 1.78,
 };
 
+const attackSkills = {
+  jumping: 70,
+};
+
 const defSkills = {
   defensiveHeading: 70,
   jumping: 70,
 };
 
 const crossPlayers = [
-  { id: 'AreaA1', team: 'A', position: { y: 1, x: 8 }, skills: {}, physical },
-  { id: 'AreaA2', team: 'A', position: { y: 2, x: 8 }, skills: {}, physical },
+  {
+    id: 'AreaA1',
+    team: 'A',
+    position: { y: 1, x: 8 },
+    skills: attackSkills,
+    physical,
+  },
+  {
+    id: 'AreaA2',
+    team: 'A',
+    position: { y: 2, x: 8 },
+    skills: attackSkills,
+    physical,
+  },
   {
     id: 'AreaOutA1',
     team: 'A',
     position: { y: 2, x: 7 },
-    skills: {},
+    skills: attackSkills,
     physical,
   },
-  { id: 'CrossA', team: 'A', position: { y: 4, x: 8 }, skills: {}, physical },
+  {
+    id: 'CrossA',
+    team: 'A',
+    position: { y: 4, x: 8 },
+    skills: {
+      crossing: 70,
+    },
+    physical,
+  },
   {
     id: 'DefBigAreaB1',
     team: 'B',

@@ -1,6 +1,15 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
+      <br />
+      <q-list bordered class="rounded-borders">
+        <q-item v-for="(texto, index) in matchLogs" :key="index" clickable>
+          <q-item-section>
+            {{ texto }}
+          </q-item-section>
+        </q-item>
+      </q-list>
+      <br />
       <q-item-label>{{ output }}</q-item-label>
     </q-page-container>
   </q-layout>
@@ -15,6 +24,7 @@ import { PassDestinationService } from 'src/services/actions/pass/PassDestinatio
 import { ChooseCrossingDestinationService } from 'src/services/actions/crossing/ChooseCrossingDestinationService';
 import { AerialInterceptationService } from 'src/services/actions/crossing/AerialInterceptationService';
 import { EventZoneEnum } from 'src/enums/ActionDecisionEnum';
+import { CrossingService } from 'src/services/actions/crossing/CrossingService';
 
 export default defineComponent({
   name: 'MainLayout',
@@ -22,6 +32,7 @@ export default defineComponent({
   components: {},
 
   setup() {
+    const matchLogs = ref([]);
     const output = ref('');
     const zone = 'BIG_AREA';
     const isAttacking = true;
@@ -48,31 +59,21 @@ export default defineComponent({
     // );
 
     // console.log(resultadoPasse);
+    const crossingService = new CrossingService(matchFieldService);
 
-    const crossChooseService = new ChooseCrossingDestinationService(
-      matchFieldService
-    );
-    const crossingChoose = crossChooseService.chooseCrossingDestination(
-      MatchFieldFactory.buildCrossPlayer()
-    );
-
-    const aerialInterceptService = new AerialInterceptationService(
-      matchFieldService
-    );
     let result;
-    for (let i = 0; i <= 10000; i++) {
-      result = aerialInterceptService.tryAerialInterceptation(
-        MatchFieldFactory.buildCrossPlayer(),
-        20,
-        crossingChoose
-      );
-      if (result.eventResulted === EventZoneEnum.PENALTY) break;
+    for (let i = 0; i <= 1; i++) {
+      result = crossingService.execute(MatchFieldFactory.buildCrossPlayer());
+      // if (result.eventResulted === EventZoneEnum.PENALTY) break;
+      break;
     }
 
     console.log(result);
 
+    matchLogs.value = matchFieldService.matchLogs;
+
     output.value = !result.success ? 'ERROU' : 'SUCESSO';
-    return { output };
+    return { output, matchLogs };
   },
 });
 </script>

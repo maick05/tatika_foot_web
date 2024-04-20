@@ -31,16 +31,19 @@ export abstract class AbstractActionService {
     // Gera um número aleatório para determinar o tipo de oscilação
     const randomOscilationTypeNumber = Math.random();
 
+    let result: number;
     // Calcula o valor oscilado com base no tipo de oscilação
     if (randomOscilationTypeNumber < probControl) {
       // Oscilação controlada: oscila até 35% para baixo do valor original
       const oscilation = 1 - Math.random() * controlLimitOscilation;
-      return value * oscilation;
+      result = value * oscilation;
     } else {
       // Oscilação total: pode oscilar de 0% a 100% do valor
-      const oscilacao = Math.random();
-      return value * oscilacao;
+      const oscilation = Math.random();
+      result = value * oscilation;
     }
+
+    return Number(result.toFixed(2));
   }
 
   protected calculateSucessProb(
@@ -82,9 +85,7 @@ export abstract class AbstractActionService {
       Math.max(0, Math.min(newPositionY, FieldLenght.WIDTH))
     );
 
-    console.log(`Desvio Máximo de ${maxDetour}`);
-
-    console.log('Bola foi para longe...');
+    this.matchFieldService.logStep('Bola desviada...');
     return { x: newPositionX, y: newPositionY };
   }
 
@@ -104,27 +105,5 @@ export abstract class AbstractActionService {
     const cornerPosition =
       AbstractEventZones[EventZoneEnum.CORNER][teamSide][cornerSide];
     return cornerPosition;
-  }
-
-  protected calculatePenalty(
-    penaltyTeam,
-    chance = PenaltyProbs.DEFAULT_PROB,
-    agressivityFactor = 0
-  ): {
-    penalty: boolean;
-    position?: Position;
-    type?: string;
-  } {
-    const factor = chance * (1 + agressivityFactor);
-    console.log(factor);
-    const penalty = this.calculateSucessProb(factor);
-    console.log('penalty');
-    console.log(penalty);
-    return { penalty, position: this.getPenaltyPosition(penaltyTeam) };
-  }
-
-  private getPenaltyPosition(penaltyTeam): Position {
-    const teamSide = this.matchFieldService.getTeamSide(penaltyTeam);
-    return AbstractEventZones[EventZoneEnum.PENALTY][teamSide];
   }
 }

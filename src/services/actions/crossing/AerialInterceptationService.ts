@@ -3,17 +3,19 @@ import { AbstractActionService } from '../AbstractActionService';
 import { MatchPlayer } from 'src/interface/MatchField';
 import { AeriaInterceptationResult } from 'src/interface/action/crossing/AeriaInterceptationResult';
 import { CrossingDestination } from 'src/interface/action/crossing/CrossingDestination';
-import { MatchEventEnum } from 'src/enums/MatchEventEnum';
 import { PlayerPositionService } from '../playerPosition/PlayerPositionService';
-import { EventZoneEnum } from 'src/enums/ActionDecisionEnum';
+import { SituationEnum } from 'src/enums/ActionDecisionEnum';
 import { PenaltyProbs } from 'src/constants/EventConstants';
+import { InfractionService } from './InfractionService';
 
 export class AerialInterceptationService extends AbstractActionService {
   protected playerPositionService: PlayerPositionService;
+  protected infractionService: InfractionService;
 
   constructor(protected readonly matchFieldService: MatchFieldService) {
     super(matchFieldService);
     this.playerPositionService = new PlayerPositionService(matchFieldService);
+    this.infractionService = new InfractionService(matchFieldService);
   }
 
   tryAerialInterceptation(
@@ -21,10 +23,6 @@ export class AerialInterceptationService extends AbstractActionService {
     crossingValue: number,
     endPosition: CrossingDestination
   ): AeriaInterceptationResult {
-    console.log('Cruzando para...');
-    console.log(endPosition.destinationPosition);
-    console.log(crossPlayer);
-
     const deffensePlayers = this.matchFieldService.getOpponentPlayers(
       crossPlayer.team
     );
@@ -37,16 +35,15 @@ export class AerialInterceptationService extends AbstractActionService {
     );
     if (lineInterceptation.success) return lineInterceptation;
 
-    console.log('Bola passou para disputa aérea');
+    this.matchFieldService.logStep('Bola passou para disputa aérea');
 
     const closeInterceptation = this.checkAerialCloseInterception(
+      crossPlayer,
       crossingValue,
       endPosition,
       deffensePlayers
     );
     if (closeInterceptation.success) return closeInterceptation;
-
-    console.log('Cruzamento chegou ao destino');
 
     return {
       success: false,
@@ -80,14 +77,14 @@ export class AerialInterceptationService extends AbstractActionService {
 
     for (const def of deffenseLinePlayers) {
       const result = this.tryInterceptation(
+        crossPlayer,
         crossingValue,
         def,
         endPosition,
         PenaltyProbs.AERIAL_LINE_INTERCEPTATION
       );
       if (result.success) {
-        console.log('Cruzamento interceptado na trajetória');
-        console.log(result);
+        this.matchFieldService.logStep('Cruzamento interceptado na trajetória');
         lineIinterceptation = result;
         break;
       }
@@ -96,6 +93,7 @@ export class AerialInterceptationService extends AbstractActionService {
   }
 
   private checkAerialCloseInterception(
+    crossPlayer: MatchPlayer,
     crossingValue: number,
     endPosition: CrossingDestination,
     deffensePlayers: MatchPlayer[]
@@ -115,13 +113,16 @@ export class AerialInterceptationService extends AbstractActionService {
 
     for (const player of areaPlayers) {
       const result = this.tryInterceptation(
+        crossPlayer,
         crossingValue,
         player,
         endPosition,
         PenaltyProbs.AERIAL_DISPUTE
       );
       if (result.success) {
-        console.log('Interceptado por adversário próximo no cruzamento');
+        this.matchFieldService.logStep(
+          'Interceptado por adversário próximo no cruzamento'
+        );
         interceptationByCloseOp = result;
         break;
       }
@@ -130,6 +131,7 @@ export class AerialInterceptationService extends AbstractActionService {
   }
 
   private tryInterceptation(
+    crossPlayer: MatchPlayer,
     crossingValue: number,
     interceptationPlayer: MatchPlayer,
     endPosition: CrossingDestination,
@@ -154,21 +156,26 @@ export class AerialInterceptationService extends AbstractActionService {
         interceptationPlayer: null,
       };
 
-    const penalty = this.calculatePenalty(
+    const penalty = this.infractionService.calculatePenalty(
       interceptationPlayer.team,
       penaltyProb
     );
-    if (penalty.penalty)
+    if (penalty.penalty) {
+      this.matchFieldService.logStep('PENALTY!!');
       return {
         success: true,
         ballPosition: penalty.position,
         interceptationPlayer,
-        eventResulted: EventZoneEnum.PENALTY,
+        situation: {
+          team: crossPlayer.team,
+          type: SituationEnum.PENALTY,
+        },
       };
+    }
 
     const cornerAvoided = this.calculateSucessProb(interceptationValue, 0.7);
 
-    if (!cornerAvoided) console.log('Bola para escanteio.');
+    if (!cornerAvoided) this.matchFieldService.logStep('Bola para escanteio.');
 
     return {
       success: true,
@@ -183,7 +190,12 @@ export class AerialInterceptationService extends AbstractActionService {
             3
           ),
       interceptationPlayer,
-      eventResulted: !cornerAvoided ? MatchEventEnum.CORNER : undefined,
+      situation: !cornerAvoided
+        ? {
+            team: crossPlayer.team,
+            type: SituationEnum.CORNER,
+          }
+        : undefined,
     };
   }
 }

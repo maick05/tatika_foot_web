@@ -3,6 +3,7 @@ import { MatchField, MatchPlayer } from 'src/interface/MatchField';
 import { Position } from 'src/interface/Position';
 
 export class MatchFieldService {
+  matchLogs: string[] = [];
   constructor(protected readonly matchField: MatchField) {}
 
   getMatchField(): MatchField {
@@ -38,5 +39,10 @@ export class MatchFieldService {
 
   setBallPosition(position: Position) {
     this.matchField.ballPosition = position;
+  }
+
+  logStep(msg: string) {
+    console.log(msg);
+    this.matchLogs.push(msg);
   }
 }

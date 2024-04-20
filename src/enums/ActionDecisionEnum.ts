@@ -35,3 +35,10 @@ export enum ActionSide {
   ATTACK = 'Attack',
   DEFENSE = 'Defense',
 }
+
+export enum SituationEnum {
+  AERIAL_OFFENSIVE_ATTACK = 'AERIAL_OFFENSIVE_ATTACK',
+  CORNER = 'CORNER',
+  PENALTY = 'PENALTY',
+  FREE_KICK = 'FREE_KICK',
+}
