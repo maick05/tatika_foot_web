@@ -127,6 +127,29 @@ export class AerialInterceptationService extends AbstractActionService {
         break;
       }
     }
+
+    if (
+      endPosition.destinationPlayer &&
+      !interceptationByCloseOp.success &&
+      areaPlayers.length
+    ) {
+      const attackFoul = this.infractionService.checkAttackInfraction(
+        endPosition.destinationPlayer.skills.aggressivity
+      );
+      if (attackFoul.infraction) {
+        this.matchFieldService.logStep('Falta de ataque.');
+        return {
+          success: true,
+          ballPosition: endPosition.destinationPosition,
+          interceptationPlayer: null,
+          situation: {
+            team: areaPlayers[0].team,
+            type: SituationEnum.FREE_KICK,
+          },
+        };
+      }
+    }
+
     return interceptationByCloseOp;
   }
 
@@ -173,9 +196,7 @@ export class AerialInterceptationService extends AbstractActionService {
       };
     }
 
-    const cornerAvoided = this.calculateSucessProb(interceptationValue, 0.7);
-
-    if (!cornerAvoided) this.matchFieldService.logStep('Bola para escanteio.');
+    const cornerAvoided = this.calculateSucessProb(interceptationValue, 0.9);
 
     return {
       success: true,

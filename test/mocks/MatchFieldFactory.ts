@@ -66,6 +66,7 @@ const physical: Partial<Physical> = {
 
 const attackSkills = {
   jumping: 70,
+  aggressivity: 70,
 };
 
 const defSkills = {

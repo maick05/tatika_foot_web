@@ -33,7 +33,7 @@ export class InfractionService extends AbstractActionService {
     infraction: boolean;
     card: number;
   } {
-    const infraction = this.calculateSucessProb(agressivityFactor * 0.2);
+    const infraction = this.calculateSucessProb(agressivityFactor * 0.25);
     return {
       infraction,
       card: 0,

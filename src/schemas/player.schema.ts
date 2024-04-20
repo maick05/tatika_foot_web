@@ -142,7 +142,7 @@ export class Skills {
   adaptability: number;
 
   @Prop({ required: true })
-  agressivity: number;
+  aggressivity: number;
 
   // Marcação
   @Prop({ required: true })

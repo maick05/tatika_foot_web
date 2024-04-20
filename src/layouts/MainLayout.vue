@@ -11,6 +11,7 @@
       </q-list>
       <br />
       <q-item-label>{{ output }}</q-item-label>
+      <q-item-label>Vezes: {{ times }}</q-item-label>
     </q-page-container>
   </q-layout>
 </template>
@@ -23,7 +24,7 @@ import { MatchFieldService } from 'src/services/field/MatchFieldService';
 import { PassDestinationService } from 'src/services/actions/pass/PassDestinationService';
 import { ChooseCrossingDestinationService } from 'src/services/actions/crossing/ChooseCrossingDestinationService';
 import { AerialInterceptationService } from 'src/services/actions/crossing/AerialInterceptationService';
-import { EventZoneEnum } from 'src/enums/ActionDecisionEnum';
+import { SituationEnum } from 'src/enums/ActionDecisionEnum';
 import { CrossingService } from 'src/services/actions/crossing/CrossingService';
 
 export default defineComponent({
@@ -33,47 +34,34 @@ export default defineComponent({
 
   setup() {
     const matchLogs = ref([]);
+    const times = ref(0);
     const output = ref('');
-    const zone = 'BIG_AREA';
-    const isAttacking = true;
-    // const actionDecision = generatePlayerDecision(zone, isAttacking);
-    // const destiny = escolherDestinatarioPasse([1, 4], 'T1');
 
     const matchFieldService = new MatchFieldService(
       // MatchFieldFactory.buildMatchFieldToPass()
       MatchFieldFactory.buildMatchFieldToCross()
     );
 
-    // const passDestService = new PassDestinationService(matchFieldService);
-    // const resultPassDest = passDestService.chooseDestinationPlayer(
-    //   MatchFieldFactory.buildPassPlayer(),
-    //   2
-    // );
-
-    // console.log(resultPassDest);
-
-    // const passService = new PassService(matchFieldService);
-    // const resultadoPasse = passService.execute(
-    //   MatchFieldFactory.buildPassPlayer(),
-    //   9
-    // );
-
-    // console.log(resultadoPasse);
     const crossingService = new CrossingService(matchFieldService);
 
     let result;
-    for (let i = 0; i <= 1; i++) {
+    let count = 0;
+    for (let i = 0; i < 1; i++) {
+      count++;
       result = crossingService.execute(MatchFieldFactory.buildCrossPlayer());
-      // if (result.eventResulted === EventZoneEnum.PENALTY) break;
-      break;
+      if (result.situation && result.situation.type === SituationEnum.FREE_KICK)
+        break;
+      // break;
     }
+
+    times.value = count;
 
     console.log(result);
 
-    matchLogs.value = matchFieldService.matchLogs;
+    matchLogs.value = count > 1 ? [] : matchFieldService.matchLogs;
 
     output.value = !result.success ? 'ERROU' : 'SUCESSO';
-    return { output, matchLogs };
+    return { output, matchLogs, times };
   },
 });
 </script>

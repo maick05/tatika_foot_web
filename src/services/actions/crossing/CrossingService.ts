@@ -6,6 +6,9 @@ import { ChooseCrossingDestinationService } from './ChooseCrossingDestinationSer
 import { AerialInterceptationService } from './AerialInterceptationService';
 import { CrossingDestination } from 'src/interface/action/crossing/CrossingDestination';
 import { SituationEnum } from 'src/enums/ActionDecisionEnum';
+import { TeamSide } from 'src/constants/FieldZones';
+import { NumberHelper } from 'src/helper/types/NumberHelper';
+import { Position } from 'src/interface/Position';
 
 export class CrossingService extends AbstractActionService {
   protected chooseCrossingDestService: ChooseCrossingDestinationService;
@@ -40,7 +43,15 @@ export class CrossingService extends AbstractActionService {
         destination
       );
 
-    if (interception.success) return interception;
+    if (interception.success) {
+      if (
+        interception.situation &&
+        interception.situation.type === SituationEnum.CORNER
+      )
+        this.matchFieldService.logStep('Bola para escanteio.');
+
+      return interception;
+    }
 
     return this.endCrossing(crossPlayer, crossingValue, destination);
   }
@@ -56,10 +67,7 @@ export class CrossingService extends AbstractActionService {
       this.matchFieldService.logStep('Cruzamento não chegou no jogador');
       return {
         success: false,
-        ballPosition: this.calculateDetour(
-          crossPlayer.position,
-          endPosition.destinationPosition
-        ),
+        ballPosition: this.getWrongCrossingPosition(crossPlayer),
       };
     }
 
@@ -73,10 +81,7 @@ export class CrossingService extends AbstractActionService {
       this.matchFieldService.logStep('Jogador não alcançou a bola.');
       return {
         success: false,
-        ballPosition: this.calculateDetour(
-          crossPlayer.position,
-          endPosition.destinationPosition
-        ),
+        ballPosition: this.getWrongCrossingPosition(crossPlayer),
       };
     }
 
@@ -89,5 +94,17 @@ export class CrossingService extends AbstractActionService {
         type: SituationEnum.AERIAL_OFFENSIVE_ATTACK,
       },
     };
+  }
+
+  private getWrongCrossingPosition(crossPlayer: MatchPlayer): Position {
+    const positionY = crossPlayer.position.y == 0 ? 4 : 0;
+    const teamSide = this.matchFieldService.getTeamSideOpposite(
+      crossPlayer.team
+    );
+    const positionX =
+      teamSide === TeamSide.HOME
+        ? NumberHelper.random(1)
+        : NumberHelper.random(8, 9);
+    return { y: positionY, x: Math.round(positionX) };
   }
 }
