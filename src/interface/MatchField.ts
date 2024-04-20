@@ -1,4 +1,4 @@
-import { Physical, Skills } from 'src/schemas/player.schema';
+import { Physical, Skills, SpecialSkills } from 'src/schemas/player.schema';
 import { Position } from './Position';
 
 export type MatchPlayer = {
@@ -6,6 +6,7 @@ export type MatchPlayer = {
   team: string;
   position: Position;
   skills: Partial<Skills>;
+  specialSkills?: Partial<SpecialSkills>;
   physical?: Partial<Physical>;
 };
 

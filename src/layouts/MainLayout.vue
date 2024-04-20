@@ -26,6 +26,7 @@ import { ChooseCrossingDestinationService } from 'src/services/actions/crossing/
 import { AerialInterceptationService } from 'src/services/actions/crossing/AerialInterceptationService';
 import { SituationEnum } from 'src/enums/ActionDecisionEnum';
 import { CrossingService } from 'src/services/actions/crossing/CrossingService';
+import { CornerService } from 'src/services/actions/events/CornerService';
 
 export default defineComponent({
   name: 'MainLayout',
@@ -42,13 +43,13 @@ export default defineComponent({
       MatchFieldFactory.buildMatchFieldToCross()
     );
 
-    const crossingService = new CrossingService(matchFieldService);
+    const service = new CornerService(matchFieldService);
 
     let result;
     let count = 0;
     for (let i = 0; i < 1; i++) {
       count++;
-      result = crossingService.execute(MatchFieldFactory.buildCrossPlayer());
+      result = service.execute('A');
       if (result.situation && result.situation.type === SituationEnum.FREE_KICK)
         break;
       // break;

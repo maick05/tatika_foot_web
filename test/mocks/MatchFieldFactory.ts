@@ -103,6 +103,9 @@ const crossPlayers = [
     skills: {
       crossing: 70,
     },
+    specialSkills: {
+      corner: 1,
+    },
     physical,
   },
   {

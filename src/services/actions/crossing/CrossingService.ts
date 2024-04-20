@@ -24,13 +24,13 @@ export class CrossingService extends AbstractActionService {
     );
   }
 
-  execute(crossPlayer: MatchPlayer): ActionResult {
+  execute(crossPlayer: MatchPlayer, crossingFactor = 1): ActionResult {
     const destination =
       this.chooseCrossingDestService.chooseCrossingDestination(crossPlayer);
 
-    const crossingValue = this.calculateOscilationResult(
-      crossPlayer.skills.crossing
-    );
+    const crossingValue =
+      this.calculateOscilationResult(crossPlayer.skills.crossing) *
+      crossingFactor;
 
     this.matchFieldService.logStep(
       `Cruzamento '${crossingValue}' para '${JSON.stringify(destination)}'...`

@@ -9,6 +9,26 @@ export type PlayerDocument = Player & Document;
 export class Player extends AbstractSchema {
   @Prop({ required: true })
   skills: Skills;
+
+  @Prop({ required: true })
+  specialSkills: SpecialSkills;
+
+  @Prop({ required: true })
+  physical: Physical;
+}
+
+export class SpecialSkills {
+  @Prop({ required: true })
+  corner: number;
+
+  @Prop({ required: true })
+  shortFreekick: number;
+
+  @Prop({ required: true })
+  longFreekick: number;
+
+  @Prop({ required: true })
+  penalty: number;
 }
 
 export class Physical {
