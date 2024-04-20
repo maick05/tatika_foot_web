@@ -11,6 +11,17 @@ export class Player extends AbstractSchema {
   skills: Skills;
 }
 
+export class Physical {
+  @Prop({ required: true })
+  height: number;
+
+  @Prop({ required: true })
+  weight: number;
+
+  @Prop({ required: true })
+  stamina: number;
+}
+
 export class Skills {
   @Prop({ required: true })
   improvisation: number;

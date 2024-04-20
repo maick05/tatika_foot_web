@@ -1,3 +1,4 @@
+import { TeamSide } from 'src/constants/FieldZones';
 import { MatchField, MatchPlayer } from 'src/interface/MatchField';
 import { Position } from 'src/interface/Position';
 
@@ -6,6 +7,18 @@ export class MatchFieldService {
 
   getMatchField(): MatchField {
     return this.matchField;
+  }
+
+  getTeamSide(team): TeamSide {
+    return this.matchField.matchInfo.teamHome == team
+      ? TeamSide.HOME
+      : TeamSide.OUT;
+  }
+
+  getTeamSideOpposite(team): TeamSide {
+    return this.matchField.matchInfo.teamHome == team
+      ? TeamSide.OUT
+      : TeamSide.HOME;
   }
 
   getTeamPlayers(team: string): MatchPlayer[] {

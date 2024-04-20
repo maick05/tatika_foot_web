@@ -14,14 +14,14 @@ export class PlayerPositionService extends AbstractActionService {
     finalPosition: Position,
     opponents: MatchPlayer[]
   ) {
-    const deltaX = finalPosition[0] - initPosition[0];
-    const deltaY = finalPosition[1] - initPosition[1];
+    const deltaX = finalPosition.y - initPosition.y;
+    const deltaY = finalPosition.x - initPosition.x;
     const cells = Math.max(Math.abs(deltaX), Math.abs(deltaY));
     const incrementX = deltaX / cells;
     const incrementY = deltaY / cells;
 
-    let actualX = initPosition[0];
-    let actualY = initPosition[1];
+    let actualX = initPosition.y;
+    let actualY = initPosition.x;
 
     for (let i = 0; i <= cells; i++) {
       actualX += incrementX;
@@ -31,10 +31,7 @@ export class PlayerPositionService extends AbstractActionService {
       const roundY = Math.round(actualY);
 
       for (const opponent of opponents) {
-        if (
-          opponent.position[0] === roundX &&
-          opponent.position[1] === roundY
-        ) {
+        if (opponent.position.y === roundY && opponent.position.x === roundX) {
           return true;
         }
       }
@@ -43,15 +40,16 @@ export class PlayerPositionService extends AbstractActionService {
     return false;
   }
 
-  closeOpponentPlayer(
+  checkIfOpponentIsClose(
     opponentDestination: Position,
-    opponentPosition: Position
+    opponentPosition: Position,
+    closeLenght = CLOSE_OPPONENT_AREA
   ) {
     const distance = this.calculateDistance(
       opponentDestination,
       opponentPosition
     );
-    const isClose = distance <= Math.sqrt(CLOSE_OPPONENT_AREA);
+    const isClose = distance <= Math.sqrt(closeLenght);
     if (isClose) console.log('Adversário Próximo');
     return isClose;
   }

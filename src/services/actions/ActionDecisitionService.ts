@@ -39,12 +39,14 @@ export class ActionDecisionService {
     let actionResult;
     switch (action) {
       case ActionDecisionEnum.SHORT_PASS:
+        actionResult = this.passService.execute(
+          actionPlayer,
+          PassRange.SHORT_PASS
+        );
       case ActionDecisionEnum.LONG_PASS:
         actionResult = this.passService.execute(
           actionPlayer,
-          action == ActionDecisionEnum.SHORT_PASS
-            ? PassRange.SHORT_PASS
-            : PassRange.LONG_PASS
+          PassRange.LONG_PASS
         );
         break;
       default:

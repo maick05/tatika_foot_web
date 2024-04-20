@@ -20,6 +20,17 @@ export enum ActionZoneEnum {
   MID_FIELD_CENTER = 'MID_FIELD_CENTER',
 }
 
+export enum AbstractFieldZoneEnum {
+  CORNER_UP = 'CORNER_UP',
+  CORNER_DOWN = 'CORNER_DOWN',
+  AREA = 'AREA',
+}
+
+export enum EventZoneEnum {
+  CORNER = 'CORNER',
+  PENALTY = 'PENALTY',
+}
+
 export enum ActionSide {
   ATTACK = 'Attack',
   DEFENSE = 'Defense',

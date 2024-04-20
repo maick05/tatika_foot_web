@@ -31,6 +31,8 @@ export class PassService extends AbstractActionService {
         passRange
       );
 
+    console.log(destinationPlayer);
+
     return this.executePass(passPlayer, destinationPlayer, passRange);
   }
 
@@ -49,6 +51,7 @@ export class PassService extends AbstractActionService {
     const passType =
       passDistance <= PassRange.SHORT_PASS ? 'shortPass' : 'longPass';
 
+    let interceptationResult: ActionResult;
     if (
       this.playerPositionService.hasPlayerOnLine(
         passPlayer.position,
@@ -56,15 +59,23 @@ export class PassService extends AbstractActionService {
         opponentPlayers
       )
     )
-      this.passWithPlayerOnLine(passPlayer, passType, opponentPlayers);
+      interceptationResult = this.passWithPlayerOnLine(
+        passPlayer,
+        passType,
+        opponentPlayers
+      );
     else
-      this.checkCloseOpponents(
+      interceptationResult = this.checkCloseOpponents(
         passPlayer,
         passType,
         destinationPlayer,
         opponentPlayers,
         passRange
       );
+
+    if (!interceptationResult.success) return interceptationResult;
+
+    console.log('Passou sem interceptação...');
 
     return this.endPass(passPlayer, passType, destinationPlayer, passDistance);
   }
@@ -92,8 +103,9 @@ export class PassService extends AbstractActionService {
         success: false,
         ballPosition: this.calculateDetour(
           destinationPlayer.position,
-          passPlayer,
-          destinationPlayer
+          passPlayer.position,
+          destinationPlayer.position,
+          2
         ),
       };
     }
@@ -131,15 +143,27 @@ export class PassService extends AbstractActionService {
     destinationPlayer: MatchPlayer,
     opponentPlayers: Array<MatchPlayer>,
     passRange: number
-  ) {
-    for (const opponent of opponentPlayers)
-      this.checkCloseOpponentInterceptation(
+  ): ActionResult {
+    let avoidCloseInterceptation: ActionResult = {
+      success: true,
+      ballPosition: destinationPlayer.position,
+    };
+
+    for (const opponent of opponentPlayers) {
+      const opponentCloseResult = this.checkCloseOpponentInterceptation(
         passPlayer,
         passType,
         destinationPlayer,
         opponent,
         passRange
       );
+      if (!opponentCloseResult.success) {
+        avoidCloseInterceptation = opponentCloseResult;
+        break;
+      }
+    }
+
+    return avoidCloseInterceptation;
   }
 
   checkCloseOpponentInterceptation(
@@ -150,7 +174,7 @@ export class PassService extends AbstractActionService {
     passRange: number
   ) {
     if (
-      this.playerPositionService.closeOpponentPlayer(
+      this.playerPositionService.checkIfOpponentIsClose(
         destinationPlayer.position,
         opponent.position
       ) &&
@@ -173,12 +197,12 @@ export class PassService extends AbstractActionService {
         );
 
       const trajectory =
-        this.interceptationService.calcularTrajetoriaInterceptacao(
+        this.interceptationService.calculateInterceptationTrajectory(
           opponent,
           passPlayer,
           destinationPlayer
         );
-
+      console.log(trajectory);
       this.matchFieldService.movePlayerPosition(opponent.id, position);
       return {
         success: false,
@@ -187,5 +211,10 @@ export class PassService extends AbstractActionService {
           : position,
       };
     }
+
+    return {
+      success: true,
+      ballPosition: destinationPlayer.position,
+    };
   }
 }

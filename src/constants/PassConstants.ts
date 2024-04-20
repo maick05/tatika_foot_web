@@ -3,6 +3,11 @@ export enum PassRange {
   LONG_PASS = 9,
 }
 
+export enum MinPassDistance {
+  SHORT_PASS = 0,
+  LONG_PASS = 3,
+}
+
 export enum PassProb {
   SHORT_PASS = 0.85,
   LONG_PASS = 0.65,

@@ -2,7 +2,11 @@ import { MatchFieldService } from 'src/services/field/MatchFieldService';
 import { AbstractActionService } from '../AbstractActionService';
 import { MatchPlayer } from 'src/interface/MatchField';
 import { Position } from 'src/interface/Position';
-import { PassProb, PassRange } from 'src/constants/PassConstants';
+import {
+  MinPassDistance,
+  PassProb,
+  PassRange,
+} from 'src/constants/PassConstants';
 
 export class PassDestinationService extends AbstractActionService {
   constructor(protected readonly matchFieldService: MatchFieldService) {
@@ -13,6 +17,10 @@ export class PassDestinationService extends AbstractActionService {
     playerPosition: MatchPlayer,
     passRange = PassRange.SHORT_PASS
   ) {
+    const minDistance =
+      passRange === PassRange.SHORT_PASS
+        ? MinPassDistance.SHORT_PASS
+        : MinPassDistance.LONG_PASS;
     const possibleOpponents = [];
     const probabillities = [];
     const teamPlayers = this.matchFieldService.getTeamPlayers(
@@ -27,7 +35,7 @@ export class PassDestinationService extends AbstractActionService {
         player.position
       );
 
-      if (distance > passRange) continue;
+      if (distance > passRange || distance < minDistance) continue;
 
       const probabilidade =
         distance === PassRange.SHORT_PASS - 1

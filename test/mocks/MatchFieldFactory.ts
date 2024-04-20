@@ -1,5 +1,6 @@
-import { MatchPlayer, MatchField } from 'src/interface/MatchField';
+import { MatchPlayer, MatchField, MatchInfo } from 'src/interface/MatchField';
 import { Position } from 'src/interface/Position';
+import { Physical } from 'src/schemas/player.schema';
 
 const habilidadesJogador = {
   shortPass: 75, // Habilidade de passe curto
@@ -7,12 +8,13 @@ const habilidadesJogador = {
   interceptation: 70, // Habilidade de interceptação
 };
 
-const posicaoJogadorPasse: Position = [1, 1]; // Jogador que faz o passe
-const posicaoDestinatario: Position = [7, 3]; // Destinatário do passe
-const posicaoAdversario1: Position = [5, 2]; // Adversário na linha de passe
-const posicaoAdversario2: Position = [6, 4]; // Adversário próximo ao destinatário
+// Alterando para a nova estrutura de objeto
+const posicaoJogadorPasse: Position = { y: 1, x: 1 }; // Jogador que faz o passe
+const posicaoDestinatario: Position = { y: 7, x: 3 }; // Destinatário do passe
+const posicaoAdversario1: Position = { y: 5, x: 2 }; // Adversário na linha de passe
+const posicaoAdversario2: Position = { y: 6, x: 4 }; // Adversário próximo ao destinatário
 
-const jogadores = [
+const passPlayers = [
   {
     id: 'passe',
     team: 'A',
@@ -22,19 +24,19 @@ const jogadores = [
   {
     id: 'closePass1',
     team: 'A',
-    position: [2, 1],
+    position: { y: 2, x: 1 },
     skills: habilidadesJogador,
   },
   {
     id: 'closePass2',
     team: 'A',
-    position: [1, 0],
+    position: { y: 1, x: 0 },
     skills: habilidadesJogador,
   },
   {
     id: 'closePassAdvClose',
     team: 'A',
-    position: [1, 3],
+    position: { y: 1, x: 3 },
     skills: habilidadesJogador,
   },
   {
@@ -43,12 +45,7 @@ const jogadores = [
     position: posicaoDestinatario,
     skills: habilidadesJogador,
   },
-  {
-    id: 'advPassLine',
-    team: 'B',
-    position: posicaoAdversario1,
-    skills: { interceptation: habilidadesJogador.interceptation },
-  },
+  // Adversários ajustados para o novo formato
   {
     id: 'advProximo',
     team: 'B',
@@ -58,17 +55,78 @@ const jogadores = [
   {
     id: 'advCloseClose',
     team: 'B',
-    position: [1, 4] as Position,
+    position: { y: 1, x: 4 },
     skills: { interceptation: habilidadesJogador.interceptation },
   },
 ];
 
+const physical: Partial<Physical> = {
+  height: 1.78,
+};
+
+const defSkills = {
+  defensiveHeading: 70,
+  jumping: 70,
+};
+
+const crossPlayers = [
+  { id: 'AreaA1', team: 'A', position: { y: 1, x: 8 }, skills: {}, physical },
+  { id: 'AreaA2', team: 'A', position: { y: 2, x: 8 }, skills: {}, physical },
+  {
+    id: 'AreaOutA1',
+    team: 'A',
+    position: { y: 2, x: 7 },
+    skills: {},
+    physical,
+  },
+  { id: 'CrossA', team: 'A', position: { y: 4, x: 8 }, skills: {}, physical },
+  {
+    id: 'DefBigAreaB1',
+    team: 'B',
+    position: { y: 1, x: 8 },
+    skills: defSkills,
+    physical,
+  },
+  {
+    id: 'DefBigAreaB2',
+    team: 'B',
+    position: { y: 3, x: 8 },
+    skills: defSkills,
+    physical,
+  },
+  {
+    id: 'SmallAreaB1',
+    team: 'B',
+    position: { y: 1, x: 9 },
+    skills: defSkills,
+    physical,
+  },
+  { id: '4', team: 'B', position: { y: 0, x: 9 }, skills: {}, physical },
+];
+
 export class MatchFieldFactory {
+  static buildMatchFieldToCross(): MatchField {
+    return {
+      matchInfo: MatchFieldFactory.buildMatchInfo(),
+      players: crossPlayers as MatchPlayer[],
+      ballPosition: crossPlayers[1].position,
+    };
+  }
   static buildMatchFieldToPass(): MatchField {
     return {
-      players: jogadores as MatchPlayer[],
+      matchInfo: MatchFieldFactory.buildMatchInfo(),
+      players: passPlayers as MatchPlayer[],
       ballPosition: posicaoJogadorPasse,
     };
+  }
+  static buildMatchInfo(): MatchInfo {
+    return {
+      teamHome: 'A',
+      teamOut: 'B',
+    };
+  }
+  static buildCrossPlayer(): MatchPlayer {
+    return crossPlayers[3];
   }
   static buildPassPlayer(): MatchPlayer {
     return {
@@ -88,11 +146,6 @@ export class MatchFieldFactory {
   }
   static buildAdversaries(): MatchPlayer[] {
     return [
-      // {
-      //   id: 'advPassLine',
-      //   position: posicaoAdversario1,
-      //   skills: { interceptation: habilidadesJogador.interceptation },
-      // },
       {
         id: 'advProximo',
         team: 'B',

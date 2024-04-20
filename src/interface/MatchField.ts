@@ -1,4 +1,4 @@
-import { Skills } from 'src/schemas/player.schema';
+import { Physical, Skills } from 'src/schemas/player.schema';
 import { Position } from './Position';
 
 export type MatchPlayer = {
@@ -6,9 +6,16 @@ export type MatchPlayer = {
   team: string;
   position: Position;
   skills: Partial<Skills>;
+  physical?: Partial<Physical>;
 };
 
 export interface MatchField {
+  matchInfo: MatchInfo;
   players: Array<MatchPlayer>;
   ballPosition: Position;
+}
+
+export interface MatchInfo {
+  teamHome: string;
+  teamOut: string;
 }

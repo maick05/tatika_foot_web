@@ -4,19 +4,24 @@ import {
 } from 'src/constants/OscilationConstants';
 import { MatchFieldService } from '../field/MatchFieldService';
 import { Position } from 'src/interface/Position';
-import { MatchPlayer } from 'src/interface/MatchField';
 import { FieldLenght } from 'src/constants/FieldConstants';
+import { AbstractEventZones } from 'src/constants/FieldZones';
+import {
+  AbstractFieldZoneEnum,
+  EventZoneEnum,
+} from 'src/enums/ActionDecisionEnum';
+import { PenaltyProbs } from 'src/constants/EventConstants';
 
 export abstract class AbstractActionService {
   constructor(protected readonly matchFieldService: MatchFieldService) {}
-  calculateDistance(position1, position2) {
+  protected calculateDistance(position1: Position, position2: Position) {
     return Math.sqrt(
-      Math.pow(position1[0] - position2[0], 2) +
-        Math.pow(position1[1] - position2[1], 2)
+      Math.pow(position1.y - position2.y, 2) +
+        Math.pow(position1.x - position2.x, 2)
     );
   }
 
-  calculateOscilationResult(value: number): number {
+  protected calculateOscilationResult(value: number): number {
     // Define a probabilidade de oscilação controlada
     const probControl = OscilationConstants.PROB_CONTROL; // 70% das vezes
 
@@ -38,13 +43,13 @@ export abstract class AbstractActionService {
     }
   }
 
-  calculateSucessProb(
+  protected calculateSucessProb(
     value: number,
     penalty = 1,
     limitBase = DefaultLimitSucessProb.LIMIT_BASE,
     comparationValue = DefaultLimitSucessProb.COMPARATION_VALUE,
     underLimitFactor = DefaultLimitSucessProb.UNDER_LIMIT_BASE
-  ) {
+  ): boolean {
     const valorDescontado = value * penalty;
     const valorAleatorio = this.calculateOscilationResult(valorDescontado);
     const resultadoLimite = this.calculateOscilationResult(
@@ -54,30 +59,72 @@ export abstract class AbstractActionService {
     return resultado;
   }
 
-  calculateDetour(
-    detourPosition: Position,
-    originPlayer: MatchPlayer,
-    destination: MatchPlayer
+  protected calculateDetour(
+    originPosition: Position,
+    destinationPosition: Position,
+    maxDetour: number = FieldLenght.WIDTH
   ): Position {
-    const detourAngle = (Math.random() * Math.PI) / 4 - Math.PI / 8; // Desvio de até 45 graus para qualquer lado
-    const detourDistance = Math.random() * 1;
+    const deltaX = destinationPosition.y - originPosition.y;
+    const deltaY = destinationPosition.x - originPosition.x;
 
-    const deltaX = destination.position[0] - originPlayer.position[0];
-    const deltaY = destination.position[1] - originPlayer.position[1];
-    const originAngle = Math.atan2(deltaY, deltaX);
+    const detourX = deltaX + (Math.random() * 2 * maxDetour - maxDetour); // Isso cria um desvio aleatório em torno de deltaX
+    const detourY = deltaY + (Math.random() * 2 * maxDetour - maxDetour); // Isso cria um desvio aleatório em torno de deltaY
 
-    const finalAngle = originAngle + detourAngle;
+    // Aplicar o desvio
+    let newPositionX = originPosition.y + detourX;
+    let newPositionY = originPosition.x + detourY;
 
-    let newPositionX = Math.round(
-      detourPosition[0] + Math.cos(finalAngle) * detourDistance
+    // Garantir que a nova posição esteja dentro dos limites do campo
+    newPositionX = Math.round(
+      Math.max(0, Math.min(newPositionX, FieldLenght.HEIGHT))
     );
-    let newPositionY = Math.round(
-      detourPosition[1] + Math.sin(finalAngle) * detourDistance
+    newPositionY = Math.round(
+      Math.max(0, Math.min(newPositionY, FieldLenght.WIDTH))
     );
 
-    newPositionX = Math.max(0, Math.min(newPositionX, FieldLenght.WIDTH));
-    newPositionY = Math.max(0, Math.min(newPositionY, FieldLenght.HEIGHT));
+    console.log(`Desvio Máximo de ${maxDetour}`);
+
     console.log('Bola foi para longe...');
-    return [newPositionX, newPositionY];
+    return { x: newPositionX, y: newPositionY };
+  }
+
+  getCornerPosition(team: string, position: Position): Position {
+    const teamSide = this.matchFieldService.getTeamSide(team);
+    let cornerSide =
+      position.y < 3
+        ? AbstractFieldZoneEnum.CORNER_UP
+        : AbstractFieldZoneEnum.CORNER_DOWN;
+
+    if (position.y == 3)
+      cornerSide =
+        Math.random() * 2 < 1
+          ? AbstractFieldZoneEnum.CORNER_UP
+          : AbstractFieldZoneEnum.CORNER_DOWN;
+
+    const cornerPosition =
+      AbstractEventZones[EventZoneEnum.CORNER][teamSide][cornerSide];
+    return cornerPosition;
+  }
+
+  protected calculatePenalty(
+    penaltyTeam,
+    chance = PenaltyProbs.DEFAULT_PROB,
+    agressivityFactor = 0
+  ): {
+    penalty: boolean;
+    position?: Position;
+    type?: string;
+  } {
+    const factor = chance * (1 + agressivityFactor);
+    console.log(factor);
+    const penalty = this.calculateSucessProb(factor);
+    console.log('penalty');
+    console.log(penalty);
+    return { penalty, position: this.getPenaltyPosition(penaltyTeam) };
+  }
+
+  private getPenaltyPosition(penaltyTeam): Position {
+    const teamSide = this.matchFieldService.getTeamSide(penaltyTeam);
+    return AbstractEventZones[EventZoneEnum.PENALTY][teamSide];
   }
 }

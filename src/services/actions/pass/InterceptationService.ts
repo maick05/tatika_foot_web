@@ -32,51 +32,51 @@ export class InterceptationService extends AbstractActionService {
     opponent: MatchPlayer,
     passRange: number
   ): Position {
-    const deltaX = destination.position[0] - passPlayer.position[0];
-    const deltaY = destination.position[1] - passPlayer.position[1];
+    const deltaY = destination.position.y - passPlayer.position.y;
+    const deltaX = destination.position.x - passPlayer.position.x;
     const steps = Math.max(Math.abs(deltaX), Math.abs(deltaY));
     const incrementoX = deltaX / steps;
     const incrementoY = deltaY / steps;
 
-    let actualX = passPlayer.position[0];
-    let actualY = passPlayer.position[1];
+    let actualX = passPlayer.position.y;
+    let actualY = passPlayer.position.x;
 
     for (let i = 0; i <= steps; i++) {
       actualX += incrementoX;
       actualY += incrementoY;
       const opponentDistance = Math.sqrt(
-        Math.pow(opponent.position[0] - actualX, passRange) +
-          Math.pow(opponent.position[1] - actualY, passRange)
+        Math.pow(opponent.position.y - actualX, passRange) +
+          Math.pow(opponent.position.x - actualY, passRange)
       );
       if (opponentDistance <= passRange)
-        return [Math.round(actualX), Math.round(actualY)];
+        return { y: Math.round(actualY), x: Math.round(actualX) };
     }
 
     return opponent.position;
   }
 
-  calcularTrajetoriaInterceptacao(
-    interceptador: MatchPlayer,
-    jogadorPasse: MatchPlayer,
-    destinatario: MatchPlayer
+  calculateInterceptationTrajectory(
+    interceptator: MatchPlayer,
+    passPlayer: MatchPlayer,
+    destination: MatchPlayer
   ) {
     const interceptacaoCompleta = this.calculateSucessProb(
-      interceptador.skills.interceptation
+      interceptator.skills.interceptation
     );
     if (!interceptacaoCompleta) {
       return {
         opponentPossession: false,
         newBallPosition: this.calculateDetour(
-          interceptador.position,
-          jogadorPasse,
-          destinatario
+          interceptator.position,
+          destination.position,
+          3
         ),
       };
     }
     console.log('Bola fica com o adversário.');
     return {
-      adversarioComPosse: true,
-      newBallPosition: interceptador.position,
+      opponentPossession: true,
+      newBallPosition: interceptator.position,
     };
   }
 }
