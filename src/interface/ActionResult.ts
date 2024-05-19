@@ -14,4 +14,5 @@ export interface ActionResult {
 export interface Situation {
   team: string;
   type: SituationEnum;
+  gkOut?: boolean;
 }

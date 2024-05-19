@@ -1,3 +1,4 @@
+import { RolePositionEnum } from 'src/enums/RolePositionEnum';
 import { MatchPlayer, MatchField, MatchInfo } from 'src/interface/MatchField';
 import { Position } from 'src/interface/Position';
 import { Physical } from 'src/schemas/player.schema';
@@ -136,7 +137,10 @@ export class MatchFieldFactory {
   static buildMatchFieldToCross(): MatchField {
     return {
       matchInfo: MatchFieldFactory.buildMatchInfo(),
-      players: crossPlayers as MatchPlayer[],
+      players: [
+        ...(crossPlayers as MatchPlayer[]),
+        MatchFieldFactory.buildGoakeeper(),
+      ],
       ballPosition: crossPlayers[1].position,
     };
   }
@@ -181,5 +185,20 @@ export class MatchFieldFactory {
         skills: { interceptation: habilidadesJogador.interceptation },
       },
     ];
+  }
+
+  static buildGoakeeper(): MatchPlayer {
+    return {
+      id: 'GK',
+      position: { y: 9, x: 2 },
+      team: 'B',
+      rolePosition: RolePositionEnum.GOALKEEPER,
+      skills: {
+        goalkeeperAerealCommand: 70,
+        goalkeeperJumping: 75,
+        goalkeeperPositioning: 80,
+        goalkeeperSaves: 80,
+      },
+    };
   }
 }

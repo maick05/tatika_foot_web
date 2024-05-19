@@ -1,5 +1,6 @@
 import { Physical, Skills, SpecialSkills } from 'src/schemas/player.schema';
 import { Position } from './Position';
+import { RolePositionEnum } from 'src/enums/RolePositionEnum';
 
 export type MatchPlayer = {
   id: string;
@@ -8,6 +9,7 @@ export type MatchPlayer = {
   skills: Partial<Skills>;
   specialSkills?: Partial<SpecialSkills>;
   physical?: Partial<Physical>;
+  rolePosition?: RolePositionEnum;
 };
 
 export interface MatchField {

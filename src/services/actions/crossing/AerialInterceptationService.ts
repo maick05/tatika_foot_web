@@ -7,6 +7,7 @@ import { PlayerPositionService } from '../playerPosition/PlayerPositionService';
 import { SituationEnum } from 'src/enums/ActionDecisionEnum';
 import { PenaltyProbs } from 'src/constants/EventConstants';
 import { InfractionService } from './InfractionService';
+import { Position } from 'src/interface/Position';
 
 export class AerialInterceptationService extends AbstractActionService {
   protected playerPositionService: PlayerPositionService;
@@ -36,6 +37,12 @@ export class AerialInterceptationService extends AbstractActionService {
     if (lineInterceptation.success) return lineInterceptation;
 
     this.matchFieldService.logStep('Bola passou para disputa aérea');
+
+    const gkIntercept = this.aerialGKInterception(
+      crossPlayer,
+      endPosition.destinationPosition
+    );
+    if (gkIntercept.success) return gkIntercept;
 
     const closeInterceptation = this.checkAerialCloseInterception(
       crossPlayer,
@@ -217,6 +224,80 @@ export class AerialInterceptationService extends AbstractActionService {
             type: SituationEnum.CORNER,
           }
         : undefined,
+    };
+  }
+
+  private aerialGKInterception(
+    crossPlayer: MatchPlayer,
+    destinationPosition: Position
+  ): AeriaInterceptationResult {
+    const continueCrossing = {
+      success: false,
+      ballPosition: destinationPosition,
+      interceptationPlayer: null,
+      situation: {
+        type: SituationEnum.AERIAL_OFFENSIVE_ATTACK,
+        team: crossPlayer.team,
+      },
+    };
+
+    if (destinationPosition.y > 0 && destinationPosition.y < 9)
+      return continueCrossing;
+
+    const offLineGK = this.calculateSucessProb(30);
+    if (!offLineGK) return continueCrossing;
+
+    this.matchFieldService.logStep('Goleiro sai para interceptar.');
+
+    const goalKeeper = this.matchFieldService.getGoalkeeper(crossPlayer.team);
+
+    const command = this.calculateOscilationResult(
+      goalKeeper.skills.goalkeeperAerealCommand
+    );
+    const jumping = this.calculateOscilationResult(
+      goalKeeper.skills.goalkeeperJumping
+    );
+    const pos = this.calculateOscilationResult(
+      goalKeeper.skills.goalkeeperPositioning
+    );
+    const gkCommandValue = (command * 7 + jumping * 2 + pos) / 10;
+
+    const gkSuccess = this.calculateSucessProb(gkCommandValue * 1.5);
+    if (!gkSuccess) {
+      this.matchFieldService.logStep('Goleira erra interceptação');
+      return {
+        ...continueCrossing,
+        situation: {
+          ...continueCrossing.situation,
+          gkOut: true,
+        },
+      };
+    }
+
+    this.matchFieldService.logStep('Goleiro intercepta.');
+
+    const gkPossession = this.calculateSucessProb(gkCommandValue);
+    if (!gkPossession)
+      return {
+        success: true,
+        ballPosition: this.calculateDetour(
+          crossPlayer.position,
+          destinationPosition,
+          4
+        ),
+        interceptationPlayer: goalKeeper,
+      };
+
+    this.matchFieldService.logStep('Posse de bola com o goleiro.');
+
+    return {
+      success: true,
+      ballPosition: goalKeeper.position,
+      interceptationPlayer: goalKeeper,
+      situation: {
+        team: goalKeeper.team,
+        type: SituationEnum.GOALKEEPER_POSSESSION,
+      },
     };
   }
 }

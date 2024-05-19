@@ -40,4 +40,11 @@ export default {
   align-items: center;
   width: 100%;
 }
+
+body {
+  background: rgb(70, 84, 99);
+  color: lightgray;
+  font-weight: bold;
+  padding: 15px;
+}
 </style>

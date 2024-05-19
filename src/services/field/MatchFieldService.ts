@@ -1,4 +1,5 @@
 import { TeamSide } from 'src/constants/FieldZones';
+import { RolePositionEnum } from 'src/enums/RolePositionEnum';
 import { MatchField, MatchPlayer } from 'src/interface/MatchField';
 import { Position } from 'src/interface/Position';
 
@@ -44,5 +45,13 @@ export class MatchFieldService {
   logStep(msg: string) {
     console.log(msg);
     this.matchLogs.push(msg);
+  }
+
+  getGoalkeeper(teamOp: string): MatchPlayer {
+    return this.matchField.players.find(
+      (player) =>
+        player.team !== teamOp &&
+        player.rolePosition == RolePositionEnum.GOALKEEPER
+    );
   }
 }
